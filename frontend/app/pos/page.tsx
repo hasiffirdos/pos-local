@@ -29,7 +29,7 @@ export default function PosPage() {
   const lastSavedRef = useRef<string | null>(null);
   const [paymentMode, setPaymentMode] = useState<'CASH' | 'CARD'>('CASH');
   const [showDetails, setShowDetails] = useState(false);
-  const posId = process.env.NEXT_PUBLIC_POS_ID || '000001';
+  const posId = process.env.NEXT_PUBLIC_POS_ID || '189278';
   const formatError = (err: unknown) => {
     const message = err instanceof Error ? err.message : String(err);
     if (message.includes('PRA IMS unavailable')) {
