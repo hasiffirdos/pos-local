@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.example.pos.controller.ItemControllerTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-02-01T17:02:21" hostname="Asifs-MacBook-Pro.local" time="0.222">
+  <properties/>
+  <testcase name="updateItem_notFound_returnsNotFound()" classname="com.example.pos.controller.ItemControllerTest" time="0.103"/>
+  <testcase name="deleteItem_returnsNoContent()" classname="com.example.pos.controller.ItemControllerTest" time="0.005"/>
+  <testcase name="createItem_returnsCreated()" classname="com.example.pos.controller.ItemControllerTest" time="0.023"/>
+  <testcase name="updateItem_returnsOk()" classname="com.example.pos.controller.ItemControllerTest" time="0.014"/>
+  <testcase name="listItems_returnsItems()" classname="com.example.pos.controller.ItemControllerTest" time="0.042"/>
+  <testcase name="createItem_withInvalidBody_returnsBadRequest()" classname="com.example.pos.controller.ItemControllerTest" time="0.02"/>
+  <system-out><![CDATA[22:02:20.868 [Test worker] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [com.example.pos.controller.ItemControllerTest]: ItemControllerTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+22:02:20.919 [Test worker] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration com.example.pos.PosApplication for test class com.example.pos.controller.ItemControllerTest
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::                (v3.2.5)
+
+2026-02-01T22:02:21.062+05:00  INFO 2998 --- [    Test worker] c.e.pos.controller.ItemControllerTest    : Starting ItemControllerTest using Java 17.0.10 with PID 2998 (started by asiffirdos in /Users/asiffirdos/work/pos-local/backend)
+2026-02-01T22:02:21.063+05:00  INFO 2998 --- [    Test worker] c.e.pos.controller.ItemControllerTest    : No active profile set, falling back to 1 default profile: "default"
+2026-02-01T22:02:21.912+05:00  INFO 2998 --- [    Test worker] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2026-02-01T22:02:21.912+05:00  INFO 2998 --- [    Test worker] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-02-01T22:02:21.913+05:00  INFO 2998 --- [    Test worker] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 1 ms
+2026-02-01T22:02:21.959+05:00  INFO 2998 --- [    Test worker] c.e.pos.controller.ItemControllerTest    : Started ItemControllerTest in 0.978 seconds (process running for 1.456)
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

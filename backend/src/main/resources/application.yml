@@ -24,7 +24,7 @@ pra:
   mode: ims
   ims-base-url: http://localhost:8524
   ims:
-    pos-id: 818425
+    pos-id: 189278
     payment-mode: 1
     invoice-type: 1
     default-pct-code: "98211000"
