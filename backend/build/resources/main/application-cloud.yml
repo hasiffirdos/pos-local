@@ -1,0 +1,21 @@
+# Example configuration for PRA Cloud Mode
+# To use this profile, run: ./gradlew bootRun --args='--spring.profiles.active=cloud'
+# Or set environment variable: SPRING_PROFILES_ACTIVE=cloud
+
+pra:
+  mode: cloud
+  cloud:
+    environment: sandbox  # Change to 'production' for live
+    # Sandbox credentials (for testing)
+    sandbox-url: https://ims.pral.com.pk/ims/sandbox/api/Live/PostData
+    sandbox-token: 24d8fab3-f2e9-398f-ae17-b387125ec4a2
+    # Production credentials (set via environment variable for security)
+    production-url: https://ims.pral.com.pk/ims/production/api/Live/PostData
+    production-token: ${PRA_PRODUCTION_TOKEN:}
+    # POS Configuration
+    pos-id: 189278
+    payment-mode: 1
+    invoice-type: 1
+    default-pct-code: "98211000"
+    cash-gst-rate: 0.16
+    card-gst-rate: 0.05
