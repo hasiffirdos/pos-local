@@ -16,6 +16,8 @@ import com.example.pos.repository.ItemRepository;
 import com.example.pos.repository.OrderItemRepository;
 import com.example.pos.repository.OrderRepository;
 import jakarta.persistence.EntityNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -28,6 +30,7 @@ import java.util.UUID;
 
 @Service
 public class OrderService {
+    private static final Logger logger = LoggerFactory.getLogger(OrderService.class);
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
     private final ItemRepository itemRepository;
@@ -96,8 +99,19 @@ public class OrderService {
     }
 
     public OrderResponse checkout(UUID orderId) {
+        logger.info("╔════════════════════════════════════════╗");
+        logger.info("║     ORDER CHECKOUT STARTED             ║");
+        logger.info("╚════════════════════════════════════════╝");
+        
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new EntityNotFoundException("Order not found"));
+        
+        logger.info("Order ID: {}", order.getId());
+        logger.info("Invoice Number: {}", order.getInvoiceNumber());
+        logger.info("Status: {}", order.getStatus());
+        logger.info("Payment Mode: {}", order.getPaymentMode());
+        logger.info("Items Count: {}", order.getItems().size());
+        
         if (order.getStatus() != OrderStatus.DRAFT) {
             throw new IllegalArgumentException("Only DRAFT orders can be checked out");
         }
@@ -107,13 +121,44 @@ public class OrderService {
         if (order.getPaymentMode() == null) {
             throw new IllegalArgumentException("Payment mode is required");
         }
+        
+        logger.info("Recalculating order totals...");
         recalcTotals(order);
+        
+        logger.info("Order Totals:");
+        logger.info("  Subtotal: {}", order.getSubtotal());
+        logger.info("  Tax: {}", order.getTax());
+        logger.info("  Discount: {}", order.getDiscount());
+        logger.info("  Total: {}", order.getTotal());
+        logger.info("  GST Rate: {}", order.getGstRate());
+        
+        logger.info("Starting PRA fiscalization...");
         PraFiscalizationResult result = fiscalizationClient.fiscalize(praInvoiceMapper.fromOrder(order));
+        
+        if (result.success()) {
+            logger.info("✅ PRA Fiscalization SUCCESS");
+            logger.info("Fiscal Invoice Number: {}", result.fiscalInvoiceNumber());
+            logger.info("QR Text: {}", result.qrText());
+            logger.info("Verification URL: {}", result.verificationUrl());
+            logger.info("Message: {}", result.message());
+        } else {
+            logger.error("❌ PRA Fiscalization FAILED");
+            logger.error("Message: {}", result.message());
+        }
+        
         order.setFiscalInvoiceNumber(result.fiscalInvoiceNumber());
         order.setFiscalQrText(result.qrText());
         order.setFiscalVerificationUrl(result.verificationUrl());
         order.setStatus(OrderStatus.PAID);
-        return toResponse(orderRepository.save(order));
+        
+        Order savedOrder = orderRepository.save(order);
+        logger.info("Order saved with status: {}", savedOrder.getStatus());
+        
+        logger.info("╔════════════════════════════════════════╗");
+        logger.info("║     ORDER CHECKOUT COMPLETED           ║");
+        logger.info("╚════════════════════════════════════════╝");
+        
+        return toResponse(savedOrder);
     }
 
     public OrderResponse updateOrder(UUID orderId, OrderUpdateRequest request) {
@@ -175,6 +220,8 @@ public class OrderService {
     }
 
     private void recalcTotals(Order order) {
+        logger.debug("Recalculating order totals for order: {}", order.getId());
+        
         BigDecimal subtotal = order.getItems().stream()
             .map(OrderItem::getLineTotal)
             .reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -197,6 +244,9 @@ public class OrderService {
         order.setTotal(total);
         order.setGstRate(gstRate);
         order.setGstAmount(tax);
+        
+        logger.debug("Totals calculated - Subtotal: {}, Discount: {}, Tax: {}, Total: {}", 
+            subtotal, orderDiscount, tax, total);
     }
 
     private BigDecimal resolveGstRate(PaymentMode paymentMode) {

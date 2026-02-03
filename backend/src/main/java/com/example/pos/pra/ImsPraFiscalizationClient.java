@@ -26,22 +26,78 @@ public class ImsPraFiscalizationClient implements PraFiscalizationClient {
     public PraFiscalizationResult fiscalize(PraInvoiceModel invoice) {
         String baseUrl = properties.getImsBaseUrl();
         String url = baseUrl + "/api/IMSFiscal/GetInvoiceNumberByModel";
-        logger.info("PRA IMS fiscalize request -> {} for USIN {}", url, invoice.usin());
+        
+        logger.info("========================================");
+        logger.info("PRA IMS Fiscalization Request");
+        logger.info("========================================");
+        logger.info("URL: {}", url);
+        logger.info("USIN: {}", invoice.usin());
+        logger.info("POS ID: {}", invoice.posId());
+        logger.info("Date/Time: {}", invoice.dateTime());
+        logger.info("Payment Mode: {}", invoice.paymentMode());
+        logger.info("Invoice Type: {}", invoice.invoiceType());
+        logger.info("----------------------------------------");
+        logger.info("Total Sale Value: {}", invoice.totalSaleValue());
+        logger.info("Total Tax Charged: {}", invoice.totalTaxCharged());
+        logger.info("Discount: {}", invoice.discount());
+        logger.info("Total Bill Amount: {}", invoice.totalBillAmount());
+        logger.info("Total Quantity: {}", invoice.totalQuantity());
+        logger.info("----------------------------------------");
+        logger.info("Items Count: {}", invoice.items().size());
+        invoice.items().forEach(item -> {
+            logger.info("  - {} x {} = {} (Tax: {}, Total: {})",
+                item.itemName(), item.quantity(), item.saleValue(), 
+                item.taxCharged(), item.totalAmount());
+        });
+        logger.info("----------------------------------------");
+        logger.info("Customer: {}", invoice.buyerName());
+        logger.info("Customer Phone: {}", invoice.buyerPhoneNumber());
+        logger.info("Customer CNIC: {}", invoice.buyerCnic());
+        logger.info("Customer PNTN: {}", invoice.buyerPntn());
+        logger.info("========================================");
 
         try {
             ImsInvoiceResponse response = restTemplate.postForObject(url, invoice, ImsInvoiceResponse.class);
-            if (response == null || response.invoiceNumber() == null || response.invoiceNumber().isBlank()) {
+            
+            logger.info("========================================");
+            logger.info("PRA IMS Fiscalization Response");
+            logger.info("========================================");
+            
+            if (response == null) {
+                logger.error("Response is NULL");
+                return new PraFiscalizationResult(false, null, null, null, "IMS response is null");
+            }
+            
+            logger.info("Invoice Number: {}", response.invoiceNumber());
+            logger.info("Code: {}", response.code());
+            logger.info("Response: {}", response.response());
+            logger.info("Errors: {}", response.errors());
+            logger.info("========================================");
+            
+            if (response.invoiceNumber() == null || response.invoiceNumber().isBlank()) {
+                logger.error("Invoice number is missing in response");
                 return new PraFiscalizationResult(false, null, null, null, "IMS response missing invoice number");
             }
 
             String qrText = "https://reg.pra.punjab.gov.pk/IMSFiscalReport/SearchPOSInvoice_Report.aspx?PRAInvNo=" + response.invoiceNumber();
             String verificationUrl = "https://reg.pra.punjab.gov.pk/IMSFiscalReport/SearchPOSInvoice_Report.aspx?PRAInvNo=" + response.invoiceNumber();
+            
+            logger.info("✅ Fiscalization SUCCESS - Invoice: {}", response.invoiceNumber());
             return new PraFiscalizationResult(true, response.invoiceNumber(), qrText, verificationUrl, response.response());
         } catch (HttpStatusCodeException ex) {
-            logger.warn("PRA IMS fiscalize failed with status {}", ex.getStatusCode());
+            logger.error("========================================");
+            logger.error("PRA IMS Fiscalization FAILED");
+            logger.error("========================================");
+            logger.error("HTTP Status: {}", ex.getStatusCode());
+            logger.error("Response Body: {}", ex.getResponseBodyAsString());
+            logger.error("========================================");
             throw new PraUnavailableException("PRA IMS unavailable (ims)");
         } catch (Exception ex) {
-            logger.warn("PRA IMS fiscalize failed", ex);
+            logger.error("========================================");
+            logger.error("PRA IMS Fiscalization FAILED");
+            logger.error("========================================");
+            logger.error("Error: {}", ex.getMessage(), ex);
+            logger.error("========================================");
             throw new PraUnavailableException("PRA IMS unavailable (ims)");
         }
     }
