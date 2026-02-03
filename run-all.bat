@@ -36,28 +36,16 @@ if not exist ".git" (
     exit /b 1
 )
 
-REM Stash any local changes to prevent conflicts
-git stash --quiet 2>nul
+REM Fetch latest from remote
+echo Fetching latest from origin...
+git fetch origin main
 
-REM Pull latest changes
-git pull origin main
-if %ERRORLEVEL% NEQ 0 (
-    echo.
-    echo WARNING: Git pull encountered an issue.
-    echo Attempting to pull without specifying branch...
-    git pull
-    if %ERRORLEVEL% NEQ 0 (
-        echo.
-        echo ERROR: Failed to pull latest changes.
-        echo Please resolve any conflicts manually and try again.
-        echo.
-        pause
-        exit /b 1
-    )
-)
+REM Reset to remote main (discards all local changes, prioritizes remote)
+echo Resetting to origin/main (remote takes priority)...
+git reset --hard origin/main
 
-REM Restore stashed changes if any
-git stash pop --quiet 2>nul
+REM Clean untracked files that might conflict
+git clean -fd 2>nul
 
 echo Pull complete!
 echo.
