@@ -38,8 +38,15 @@ public class PraInvoiceMapper {
         logger.info("GST Rate: {}% ({}), Invoice Type: {}", 
             gstRate.multiply(ONE_HUNDRED), gstRate, invoiceType);
         
+        // Calculate raw total sale value first (to determine discount proportion)
+        BigDecimal rawTotalSaleValue = order.getItems().stream()
+            .map(item -> defaultZero(item.getLineTotal()))
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+        
+        BigDecimal totalDiscount = defaultZero(order.getDiscount());
+        
         List<PraInvoiceItem> items = order.getItems().stream()
-            .map(item -> toItem(item, invoiceType, gstRate))
+            .map(item -> toItem(item, invoiceType, gstRate, totalDiscount, rawTotalSaleValue))
             .toList();
 
         // Calculate totals from items
@@ -55,13 +62,12 @@ public class PraInvoiceMapper {
             .map(PraInvoiceItem::quantity)
             .reduce(BigDecimal.ZERO, BigDecimal::add);
         
-        BigDecimal totalDiscount = defaultZero(order.getDiscount());
         BigDecimal totalFurtherTax = BigDecimal.ZERO;
 
-        // PRA Formula: TotalBillAmount = TotalSaleValue + TotalTaxCharged - Discount
+        // TotalBillAmount = TotalSaleValue + TotalTaxCharged
+        // (Discount already applied at item level, so no need to subtract here)
         BigDecimal totalBillAmount = totalSaleValue
             .add(totalTaxCharged)
-            .subtract(totalDiscount)
             .setScale(2, RoundingMode.HALF_UP);
         
         if (totalBillAmount.signum() < 0) {
@@ -72,8 +78,8 @@ public class PraInvoiceMapper {
         logger.info("Total Sale Value: {}", totalSaleValue);
         logger.info("Total Tax Charged: {}", totalTaxCharged);
         logger.info("Total Discount: {}", totalDiscount);
-        logger.info("Total Bill Amount: {} (Formula: {} + {} - {})", 
-            totalBillAmount, totalSaleValue, totalTaxCharged, totalDiscount);
+        logger.info("Total Bill Amount: {} (Formula: {} + {}, discount already in saleValue)", 
+            totalBillAmount, totalSaleValue, totalTaxCharged);
         logger.info("Total Quantity: {}", totalQuantity);
 
         PraInvoiceModel model = new PraInvoiceModel(
@@ -101,7 +107,8 @@ public class PraInvoiceMapper {
         return model;
     }
 
-    private PraInvoiceItem toItem(OrderItem orderItem, int invoiceType, BigDecimal gstRate) {
+    private PraInvoiceItem toItem(OrderItem orderItem, int invoiceType, BigDecimal gstRate,
+                                   BigDecimal totalDiscount, BigDecimal rawTotalSaleValue) {
         var item = orderItem.getItem();
         if (item.getItemCode() == null || item.getItemCode().isBlank()) {
             throw new IllegalArgumentException("Item code is required for fiscalization");
@@ -110,24 +117,32 @@ public class PraInvoiceMapper {
         BigDecimal quantity = BigDecimal.valueOf(orderItem.getQuantity());
         BigDecimal lineTotal = defaultZero(orderItem.getLineTotal());
         
+        // Calculate proportional discount for this item
+        BigDecimal itemDiscount = BigDecimal.ZERO;
+        if (rawTotalSaleValue.signum() > 0 && totalDiscount.signum() > 0) {
+            itemDiscount = lineTotal
+                .divide(rawTotalSaleValue, 10, RoundingMode.HALF_UP)
+                .multiply(totalDiscount)
+                .setScale(2, RoundingMode.HALF_UP);
+        }
+        
         // PRA Format:
-        // SaleValue = Price × Quantity (EXCLUDING tax)
+        // SaleValue = Price × Quantity - Proportional Discount (EXCLUDING tax)
         // TaxCharged = SaleValue × TaxRate
         // TotalAmount = SaleValue + TaxCharged
         
-        // Our lineTotal is price × quantity (without tax)
-        BigDecimal saleValue = lineTotal.setScale(2, RoundingMode.HALF_UP);
+        // SaleValue AFTER discount
+        BigDecimal saleValue = lineTotal.subtract(itemDiscount).setScale(2, RoundingMode.HALF_UP);
         
         // PRA expects TaxRate as percentage (e.g., 16 for 16%, not 0.16)
         BigDecimal taxRate = gstRate.multiply(ONE_HUNDRED).setScale(2, RoundingMode.HALF_UP);
         
-        // Calculate tax on the sale value
+        // Calculate tax on the discounted sale value
         BigDecimal taxCharged = saleValue.multiply(gstRate).setScale(2, RoundingMode.HALF_UP);
         
-        // Total = SaleValue + Tax (no item-level discount in current implementation)
+        // Total = SaleValue + Tax
         BigDecimal totalAmount = saleValue.add(taxCharged).setScale(2, RoundingMode.HALF_UP);
         
-        BigDecimal itemDiscount = BigDecimal.ZERO;
         BigDecimal furtherTax = BigDecimal.ZERO;
 
         String pctCode = item.getPctCode();
@@ -138,8 +153,9 @@ public class PraInvoiceMapper {
         logger.info("  Item: {} ({})", item.getName(), item.getItemCode());
         logger.info("    Quantity: {}, Unit Price: {}, Line Total: {}", 
             quantity, orderItem.getUnitPrice(), lineTotal);
-        logger.info("    Sale Value: {}, Tax Rate: {}%, Tax Charged: {}, Total Amount: {}", 
-            saleValue, taxRate, taxCharged, totalAmount);
+        logger.info("    Item Discount: {}, Sale Value (after discount): {}", itemDiscount, saleValue);
+        logger.info("    Tax Rate: {}%, Tax Charged: {}, Total Amount: {}", 
+            taxRate, taxCharged, totalAmount);
         logger.info("    PCT Code: {}", pctCode);
 
         return new PraInvoiceItem(
