@@ -33,9 +33,9 @@ pra:
   cloud:
     environment: production  # Options: sandbox, production
     sandbox-url: https://ims.pral.com.pk/ims/sandbox/api/Live/PostData
-    sandbox-token: 24d8fab3-f2e9-398f-ae17-b387125ec4a2
+    sandbox-token: 24d8fab3-f2e9-398f-ae17-b387125ec4a2-placeholder
     production-url: https://ims.pral.com.pk/ims/production/api/Live/PostData
-    production-token: ${PRA_PRODUCTION_TOKEN:4b7004a6-2ef9-38aa-83ea-b6237b77087d}
+    production-token: 4b7004a6-2ef9-38aa-83ea-b6237b77087d
     pos-id: 189278
     payment-mode: 1
     invoice-type: 1
