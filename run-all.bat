@@ -25,7 +25,6 @@ echo.
 REM ============================================
 REM Step 2: Pull latest changes from Git
 REM ============================================
-echo [2/3] Pulling latest changes from repository...
 
 REM Check if current directory is a git repository
 if not exist ".git" (
@@ -37,18 +36,14 @@ if not exist ".git" (
 )
 
 REM Fetch latest from remote
-echo Fetching latest from origin...
 git fetch origin main
 
 REM Reset to remote main (discards all local changes, prioritizes remote)
-echo Resetting to origin/main (remote takes priority)...
 git reset --hard origin/main
 
 REM Clean untracked files that might conflict
 git clean -fd 2>nul
 
-echo Pull complete!
-echo.
 
 REM ============================================
 REM Step 3: Start the application
