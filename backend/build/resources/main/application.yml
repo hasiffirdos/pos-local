@@ -21,7 +21,7 @@ app:
     allowed-origins: http://localhost:3000,http://127.0.0.1:3000
 
 pra:
-  mode: ims  # Options: ims, cloud, stub
+  mode: cloud  # Options: ims, cloud, stub
   ims-base-url: http://localhost:8524
   ims:
     pos-id: 189278
