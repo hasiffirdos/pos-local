@@ -29,10 +29,10 @@ public class PraInvoiceMapper {
 
     public PraInvoiceModel fromOrder(Order order) {
         logger.info("=== PRA Invoice Mapping Started ===");
-        logger.info("Order ID: {}, Invoice Number: {}, Payment Mode: {}", 
-            order.getId(), order.getInvoiceNumber(), order.getPaymentMode());
+        logger.info("Order ID: {}, Invoice Number: {}, Payment Mode: {}, PRA Mode: {}", 
+            order.getId(), order.getInvoiceNumber(), order.getPaymentMode(), properties.getMode());
         
-        int invoiceType = properties.getIms().getInvoiceType();
+        int invoiceType = getInvoiceType();
         BigDecimal gstRate = resolveGstRate(order.getPaymentMode());
         
         logger.info("GST Rate: {}% ({}), Invoice Type: {}", 
@@ -83,7 +83,7 @@ public class PraInvoiceMapper {
         logger.info("Total Quantity: {}", totalQuantity);
 
         PraInvoiceModel model = new PraInvoiceModel(
-            properties.getIms().getPosId(),
+            getPosId(),
             order.getInvoiceNumber(),
             IMS_DATE_TIME.format(order.getCreatedAt()),
             totalSaleValue,
@@ -147,7 +147,7 @@ public class PraInvoiceMapper {
 
         String pctCode = item.getPctCode();
         if (pctCode == null || pctCode.isBlank()) {
-            pctCode = properties.getIms().getDefaultPctCode();
+            pctCode = getDefaultPctCode();
         }
 
         logger.info("  Item: {} ({})", item.getName(), item.getItemCode());
@@ -194,8 +194,32 @@ public class PraInvoiceMapper {
 
     private BigDecimal resolveGstRate(com.example.pos.entity.PaymentMode paymentMode) {
         if (paymentMode == com.example.pos.entity.PaymentMode.CARD) {
-            return BigDecimal.valueOf(properties.getIms().getCardGstRate());
+            return BigDecimal.valueOf(getCardGstRate());
         }
-        return BigDecimal.valueOf(properties.getIms().getCashGstRate());
+        return BigDecimal.valueOf(getCashGstRate());
+    }
+
+    private boolean isCloudMode() {
+        return "cloud".equalsIgnoreCase(properties.getMode());
+    }
+
+    private int getInvoiceType() {
+        return isCloudMode() ? properties.getCloud().getInvoiceType() : properties.getIms().getInvoiceType();
+    }
+
+    private String getDefaultPctCode() {
+        return isCloudMode() ? properties.getCloud().getDefaultPctCode() : properties.getIms().getDefaultPctCode();
+    }
+
+    private double getCashGstRate() {
+        return isCloudMode() ? properties.getCloud().getCashGstRate() : properties.getIms().getCashGstRate();
+    }
+
+    private double getCardGstRate() {
+        return isCloudMode() ? properties.getCloud().getCardGstRate() : properties.getIms().getCardGstRate();
+    }
+
+    private long getPosId() {
+        return isCloudMode() ? properties.getCloud().getPosId() : properties.getIms().getPosId();
     }
 }

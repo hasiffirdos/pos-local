@@ -768,6 +768,19 @@ a {
   margin-top: 16px;
 }
 
+.receipt-software-contact {
+  text-align: center;
+  margin-top: 12px;
+  padding-top: 8px;
+  font-size: 10px;
+  color: #666;
+  line-height: 1.5;
+}
+
+.receipt-software-contact p {
+  margin: 2px 0;
+}
+
 .status-badge {
   display: inline-block;
   padding: 6px 16px;

@@ -532,6 +532,14 @@ export default function PosPage() {
               </span>
             </div>
           )}
+
+          {/* Software Contact Info */}
+          <div className="receipt-divider"></div>
+          <div className="receipt-software-contact">
+            <p>For POS Software inquiries:</p>
+            <p>📞 0316-4985788</p>
+            <p>✉️ h.asif.firdos@gmail.com</p>
+          </div>
         </div>
         <div className="collapsible">
           <button
