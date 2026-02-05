@@ -86,7 +86,7 @@ public class PraInvoiceMapper {
         BigDecimal totalAmount = saleValue.add(taxCharged).setScale(2, RoundingMode.HALF_UP);
         
         String pctCode = item.getPctCode();
-        if (pctCode == null || pctCode.isBlank()) {
+        if (pctCode == null || pctCode.isBlank() || "00000000".equals(pctCode)) {
             pctCode = props.getDefaultPctCode();
         }
 
