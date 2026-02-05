@@ -28,13 +28,24 @@ if not exist ".git" (
 
 git fetch origin main >nul 2>&1
 
-git stash push -m "local-config" -- backend/src/main/resources/application.yml backend/build/resources/main/application.yml >nul 2>&1
+REM Check if application.yml has local changes
+git diff --quiet backend/src/main/resources/application.yml >nul 2>&1
+set APP_YML_CHANGED=%ERRORLEVEL%
 
+REM Save local application.yml if modified
+if %APP_YML_CHANGED% NEQ 0 (
+    copy backend\src\main\resources\application.yml backend\src\main\resources\application.yml.local >nul 2>&1
+)
+
+REM Reset everything to remote
 git reset --hard origin/main >nul 2>&1
-
 git clean -fd >nul 2>&1
 
-git stash pop >nul 2>&1
+REM Restore local application.yml if it was modified
+if %APP_YML_CHANGED% NEQ 0 (
+    copy backend\src\main\resources\application.yml.local backend\src\main\resources\application.yml >nul 2>&1
+    del backend\src\main\resources\application.yml.local >nul 2>&1
+)
 
 
 
