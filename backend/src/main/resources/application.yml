@@ -21,10 +21,10 @@ app:
     allowed-origins: http://localhost:3000,http://127.0.0.1:3000
 
 pra:
-  mode: ims  # Options: ims, cloud, stub
+  mode: cloud  # Options: ims, cloud, stub
   ims-base-url: http://localhost:8524
   ims:
-    pos-id: 189278
+    pos-id: 190366
     payment-mode: 1
     invoice-type: 1
     default-pct-code: "98211000"
@@ -35,8 +35,8 @@ pra:
     sandbox-url: https://ims.pral.com.pk/ims/sandbox/api/Live/PostData
     sandbox-token: 24d8fab3-f2e9-398f-ae17-b387125ec4a2-placeholder
     production-url: https://ims.pral.com.pk/ims/production/api/Live/PostData
-    production-token: 4b7004a6-2ef9-38aa-83ea-b6237b77087d
-    pos-id: 189278
+    production-token: 7e0c3215-b04f-3444-9dcc-999c86ec85f3
+    pos-id: 190366
     payment-mode: 1
     invoice-type: 1
     default-pct-code: "98211000"
