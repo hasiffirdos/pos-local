@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.example.pos.controller.ReportControllerTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-02-04T15:50:00" hostname="Asifs-MacBook-Pro.local" time="0.011">
+<testsuite name="com.example.pos.controller.ReportControllerTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-02-05T14:44:35" hostname="Asifs-MacBook-Pro.local" time="0.009">
   <properties/>
-  <testcase name="dailySales_returnsReport()" classname="com.example.pos.controller.ReportControllerTest" time="0.007"/>
-  <testcase name="dailySales_missingDate_returnsServerError()" classname="com.example.pos.controller.ReportControllerTest" time="0.004"/>
-  <system-out><![CDATA[2026-02-04T20:50:00.670+05:00  INFO 78882 --- [    Test worker] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [com.example.pos.controller.ReportControllerTest]: ReportControllerTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
-2026-02-04T20:50:00.673+05:00  INFO 78882 --- [    Test worker] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration com.example.pos.PosApplication for test class com.example.pos.controller.ReportControllerTest
+  <testcase name="dailySales_returnsReport()" classname="com.example.pos.controller.ReportControllerTest" time="0.006"/>
+  <testcase name="dailySales_missingDate_returnsServerError()" classname="com.example.pos.controller.ReportControllerTest" time="0.002"/>
+  <system-out><![CDATA[2026-02-05T19:44:35.843+05:00  INFO 66273 --- [    Test worker] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [com.example.pos.controller.ReportControllerTest]: ReportControllerTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-02-05T19:44:35.846+05:00  INFO 66273 --- [    Test worker] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration com.example.pos.PosApplication for test class com.example.pos.controller.ReportControllerTest
 
   .   ____          _            __ _ _
  /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
@@ -14,12 +14,12 @@
  =========|_|==============|___/=/_/_/_/
  :: Spring Boot ::                (v3.2.5)
 
-2026-02-04T20:50:00.682+05:00  INFO 78882 --- [    Test worker] c.e.pos.controller.ReportControllerTest  : Starting ReportControllerTest using Java 17.0.10 with PID 78882 (started by asiffirdos in /Users/asiffirdos/work/pos-local/backend)
-2026-02-04T20:50:00.683+05:00  INFO 78882 --- [    Test worker] c.e.pos.controller.ReportControllerTest  : No active profile set, falling back to 1 default profile: "default"
-2026-02-04T20:50:00.784+05:00  INFO 78882 --- [    Test worker] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
-2026-02-04T20:50:00.785+05:00  INFO 78882 --- [    Test worker] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
-2026-02-04T20:50:00.785+05:00  INFO 78882 --- [    Test worker] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 0 ms
-2026-02-04T20:50:00.788+05:00  INFO 78882 --- [    Test worker] c.e.pos.controller.ReportControllerTest  : Started ReportControllerTest in 0.114 seconds (process running for 2.511)
+2026-02-05T19:44:35.855+05:00  INFO 66273 --- [    Test worker] c.e.pos.controller.ReportControllerTest  : Starting ReportControllerTest using Java 17.0.10 with PID 66273 (started by asiffirdos in /Users/asiffirdos/work/pos-local/backend)
+2026-02-05T19:44:35.855+05:00  INFO 66273 --- [    Test worker] c.e.pos.controller.ReportControllerTest  : No active profile set, falling back to 1 default profile: "default"
+2026-02-05T19:44:35.935+05:00  INFO 66273 --- [    Test worker] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2026-02-05T19:44:35.936+05:00  INFO 66273 --- [    Test worker] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-02-05T19:44:35.936+05:00  INFO 66273 --- [    Test worker] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 0 ms
+2026-02-05T19:44:35.939+05:00  INFO 66273 --- [    Test worker] c.e.pos.controller.ReportControllerTest  : Started ReportControllerTest in 0.092 seconds (process running for 1.957)
 ]]></system-out>
   <system-err><![CDATA[]]></system-err>
 </testsuite>

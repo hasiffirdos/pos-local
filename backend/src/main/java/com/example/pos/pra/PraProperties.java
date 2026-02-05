@@ -2,14 +2,11 @@ package com.example.pos.pra;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-import java.math.BigDecimal;
-
 @ConfigurationProperties(prefix = "pra")
 public class PraProperties {
-    private String mode = "stub";  // Options: cloud, stub
     
     // PRA Cloud API settings
-    private String environment = "sandbox";  // Options: sandbox, production
+    private String environment = "production";  // Options: sandbox, production
     private String sandboxUrl = "https://ims.pral.com.pk/ims/sandbox/api/Live/PostData";
     private String sandboxToken = "";
     private String productionUrl = "https://ims.pral.com.pk/ims/production/api/Live/PostData";
@@ -24,19 +21,8 @@ public class PraProperties {
     
     // Verification URL base
     private String verifyUrlBase = "https://reg.pra.punjab.gov.pk/IMSFiscalReport/SearchPOSInvoice_Report.aspx?PRAInvNo=";
-    
-    // Stub settings (for testing)
-    private final Stub stub = new Stub();
 
     // Getters and setters
-    public String getMode() {
-        return mode;
-    }
-
-    public void setMode(String mode) {
-        this.mode = mode;
-    }
-
     public String getEnvironment() {
         return environment;
     }
@@ -125,10 +111,6 @@ public class PraProperties {
         this.verifyUrlBase = verifyUrlBase;
     }
 
-    public Stub getStub() {
-        return stub;
-    }
-
     // Convenience methods
     public String getApiUrl() {
         return "production".equalsIgnoreCase(environment) ? productionUrl : sandboxUrl;
@@ -136,35 +118,5 @@ public class PraProperties {
 
     public String getApiToken() {
         return "production".equalsIgnoreCase(environment) ? productionToken : sandboxToken;
-    }
-
-    public static class Stub {
-        private boolean enabled = true;
-        private double failRate = 0.0;
-        private BigDecimal failOnAmountAbove = BigDecimal.ZERO;
-
-        public boolean isEnabled() {
-            return enabled;
-        }
-
-        public void setEnabled(boolean enabled) {
-            this.enabled = enabled;
-        }
-
-        public double getFailRate() {
-            return failRate;
-        }
-
-        public void setFailRate(double failRate) {
-            this.failRate = failRate;
-        }
-
-        public BigDecimal getFailOnAmountAbove() {
-            return failOnAmountAbove;
-        }
-
-        public void setFailOnAmountAbove(BigDecimal failOnAmountAbove) {
-            this.failOnAmountAbove = failOnAmountAbove;
-        }
     }
 }

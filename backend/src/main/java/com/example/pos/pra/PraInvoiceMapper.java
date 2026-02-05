@@ -5,8 +5,6 @@ import com.example.pos.entity.OrderItem;
 import com.example.pos.entity.PaymentMode;
 import com.example.pos.pra.dto.PraInvoiceItem;
 import com.example.pos.pra.dto.PraInvoiceModel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -17,7 +15,6 @@ import java.util.List;
 
 @Component
 public class PraInvoiceMapper {
-    private static final Logger logger = LoggerFactory.getLogger(PraInvoiceMapper.class);
     private static final DateTimeFormatter DATE_FORMAT =
         DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.of("Asia/Karachi"));
     private static final BigDecimal HUNDRED = new BigDecimal("100");
@@ -29,8 +26,6 @@ public class PraInvoiceMapper {
     }
 
     public PraInvoiceModel fromOrder(Order order) {
-        logger.info("Mapping order {} to PRA invoice", order.getId());
-        
         BigDecimal gstRate = getGstRate(order.getPaymentMode());
         BigDecimal rawTotal = calcRawTotal(order);
         BigDecimal discount = defaultZero(order.getDiscount());
@@ -43,8 +38,6 @@ public class PraInvoiceMapper {
         BigDecimal totalTax = sum(items, PraInvoiceItem::taxCharged);
         BigDecimal totalQty = sum(items, PraInvoiceItem::quantity);
         BigDecimal totalBill = totalSale.add(totalTax).max(BigDecimal.ZERO);
-
-        logger.info("Invoice totals - Sale: {}, Tax: {}, Bill: {}", totalSale, totalTax, totalBill);
 
         return new PraInvoiceModel(
             props.getPosId(),
@@ -96,8 +89,6 @@ public class PraInvoiceMapper {
         if (pctCode == null || pctCode.isBlank()) {
             pctCode = props.getDefaultPctCode();
         }
-
-        logger.debug("Item {} - Sale: {}, Tax: {}, PCT: {}", item.getName(), saleValue, taxCharged, pctCode);
 
         return new PraInvoiceItem(
             item.getItemCode(),

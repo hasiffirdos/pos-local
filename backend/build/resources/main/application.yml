@@ -21,28 +21,14 @@ app:
     allowed-origins: http://localhost:3000,http://127.0.0.1:3000
 
 pra:
-  mode: cloud  # Options: ims, cloud, stub
-  ims-base-url: http://localhost:8524
-  ims:
-    pos-id: 189278
-    payment-mode: 1
-    invoice-type: 1
-    default-pct-code: "98211000"
-    cash-gst-rate: 0.16
-    card-gst-rate: 0.05
-  cloud:
-    environment: production  # Options: sandbox, production
-    sandbox-url: https://ims.pral.com.pk/ims/sandbox/api/Live/PostData
-    sandbox-token: 24d8fab3-f2e9-398f-ae17-b387125ec4a2-placeholder
-    production-url: https://ims.pral.com.pk/ims/production/api/Live/PostData
-    production-token: 7e0c3215-b04f-3444-9dcc-999c86ec85f3
-    pos-id: 189278
-    payment-mode: 1
-    invoice-type: 1
-    default-pct-code: "98211000"
-    cash-gst-rate: 0.16
-    card-gst-rate: 0.05
-  stub:
-    enabled: false
-    fail-rate: 0.0
-    fail-on-amount-above: 0
+  environment: production  # Options: sandbox, production
+  sandbox-url: https://ims.pral.com.pk/ims/sandbox/api/Live/PostData
+  sandbox-token: 24d8fab3-f2e9-398f-ae17-b387125ec4a2
+  production-url: https://ims.pral.com.pk/ims/production/api/Live/PostData
+  production-token: 7e0c3215-b04f-3444-9dcc-999c86ec85f3
+  pos-id: 190366
+  invoice-type: 1
+  default-pct-code: "98211000"
+  cash-gst-rate: 0.16
+  card-gst-rate: 0.05
+  verify-url-base: https://reg.pra.punjab.gov.pk/IMSFiscalReport/SearchPOSInvoice_Report.aspx?PRAInvNo=

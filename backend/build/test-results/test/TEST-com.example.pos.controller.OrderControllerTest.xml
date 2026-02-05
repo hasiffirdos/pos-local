@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.example.pos.controller.OrderControllerTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-02-04T15:50:00" hostname="Asifs-MacBook-Pro.local" time="0.027">
+<testsuite name="com.example.pos.controller.OrderControllerTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-02-05T14:44:35" hostname="Asifs-MacBook-Pro.local" time="0.024">
   <properties/>
-  <testcase name="createOrder_returnsCreated()" classname="com.example.pos.controller.OrderControllerTest" time="0.009"/>
+  <testcase name="createOrder_returnsCreated()" classname="com.example.pos.controller.OrderControllerTest" time="0.007"/>
   <testcase name="getOrder_notFound_returnsNotFound()" classname="com.example.pos.controller.OrderControllerTest" time="0.003"/>
-  <testcase name="addOrUpdateItem_returnsOrder()" classname="com.example.pos.controller.OrderControllerTest" time="0.006"/>
+  <testcase name="addOrUpdateItem_returnsOrder()" classname="com.example.pos.controller.OrderControllerTest" time="0.005"/>
   <testcase name="checkout_withIllegalArgument_returnsBadRequest()" classname="com.example.pos.controller.OrderControllerTest" time="0.002"/>
   <testcase name="getOrder_returnsOrder()" classname="com.example.pos.controller.OrderControllerTest" time="0.002"/>
   <testcase name="addOrUpdateItem_withInvalidBody_returnsBadRequest()" classname="com.example.pos.controller.OrderControllerTest" time="0.002"/>
-  <system-out><![CDATA[2026-02-04T20:50:00.486+05:00  INFO 78882 --- [    Test worker] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [com.example.pos.controller.OrderControllerTest]: OrderControllerTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
-2026-02-04T20:50:00.490+05:00  INFO 78882 --- [    Test worker] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration com.example.pos.PosApplication for test class com.example.pos.controller.OrderControllerTest
+  <system-out><![CDATA[2026-02-05T19:44:35.677+05:00  INFO 66273 --- [    Test worker] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [com.example.pos.controller.OrderControllerTest]: OrderControllerTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-02-05T19:44:35.680+05:00  INFO 66273 --- [    Test worker] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration com.example.pos.PosApplication for test class com.example.pos.controller.OrderControllerTest
 
   .   ____          _            __ _ _
  /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
@@ -18,12 +18,12 @@
  =========|_|==============|___/=/_/_/_/
  :: Spring Boot ::                (v3.2.5)
 
-2026-02-04T20:50:00.505+05:00  INFO 78882 --- [    Test worker] c.e.pos.controller.OrderControllerTest   : Starting OrderControllerTest using Java 17.0.10 with PID 78882 (started by asiffirdos in /Users/asiffirdos/work/pos-local/backend)
-2026-02-04T20:50:00.505+05:00  INFO 78882 --- [    Test worker] c.e.pos.controller.OrderControllerTest   : No active profile set, falling back to 1 default profile: "default"
-2026-02-04T20:50:00.637+05:00  INFO 78882 --- [    Test worker] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
-2026-02-04T20:50:00.637+05:00  INFO 78882 --- [    Test worker] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
-2026-02-04T20:50:00.637+05:00  INFO 78882 --- [    Test worker] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 0 ms
-2026-02-04T20:50:00.640+05:00  INFO 78882 --- [    Test worker] c.e.pos.controller.OrderControllerTest   : Started OrderControllerTest in 0.149 seconds (process running for 2.363)
+2026-02-05T19:44:35.694+05:00  INFO 66273 --- [    Test worker] c.e.pos.controller.OrderControllerTest   : Starting OrderControllerTest using Java 17.0.10 with PID 66273 (started by asiffirdos in /Users/asiffirdos/work/pos-local/backend)
+2026-02-05T19:44:35.694+05:00  INFO 66273 --- [    Test worker] c.e.pos.controller.OrderControllerTest   : No active profile set, falling back to 1 default profile: "default"
+2026-02-05T19:44:35.812+05:00  INFO 66273 --- [    Test worker] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2026-02-05T19:44:35.813+05:00  INFO 66273 --- [    Test worker] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-02-05T19:44:35.813+05:00  INFO 66273 --- [    Test worker] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 0 ms
+2026-02-05T19:44:35.816+05:00  INFO 66273 --- [    Test worker] c.e.pos.controller.OrderControllerTest   : Started OrderControllerTest in 0.135 seconds (process running for 1.834)
 ]]></system-out>
   <system-err><![CDATA[]]></system-err>
 </testsuite>
