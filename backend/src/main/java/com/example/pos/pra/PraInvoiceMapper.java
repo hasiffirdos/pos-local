@@ -2,6 +2,7 @@ package com.example.pos.pra;
 
 import com.example.pos.entity.Order;
 import com.example.pos.entity.OrderItem;
+import com.example.pos.entity.PaymentMode;
 import com.example.pos.pra.dto.PraInvoiceItem;
 import com.example.pos.pra.dto.PraInvoiceModel;
 import org.slf4j.Logger;
@@ -17,209 +18,129 @@ import java.util.List;
 @Component
 public class PraInvoiceMapper {
     private static final Logger logger = LoggerFactory.getLogger(PraInvoiceMapper.class);
-    private static final DateTimeFormatter IMS_DATE_TIME =
+    private static final DateTimeFormatter DATE_FORMAT =
         DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.of("Asia/Karachi"));
-    private static final BigDecimal ONE_HUNDRED = new BigDecimal("100");
+    private static final BigDecimal HUNDRED = new BigDecimal("100");
 
-    private final PraProperties properties;
+    private final PraProperties props;
 
-    public PraInvoiceMapper(PraProperties properties) {
-        this.properties = properties;
+    public PraInvoiceMapper(PraProperties props) {
+        this.props = props;
     }
 
     public PraInvoiceModel fromOrder(Order order) {
-        logger.info("=== PRA Invoice Mapping Started ===");
-        logger.info("Order ID: {}, Invoice Number: {}, Payment Mode: {}, PRA Mode: {}", 
-            order.getId(), order.getInvoiceNumber(), order.getPaymentMode(), properties.getMode());
+        logger.info("Mapping order {} to PRA invoice", order.getId());
         
-        int invoiceType = getInvoiceType();
-        BigDecimal gstRate = resolveGstRate(order.getPaymentMode());
-        
-        logger.info("GST Rate: {}% ({}), Invoice Type: {}", 
-            gstRate.multiply(ONE_HUNDRED), gstRate, invoiceType);
-        
-        // Calculate raw total sale value first (to determine discount proportion)
-        BigDecimal rawTotalSaleValue = order.getItems().stream()
-            .map(item -> defaultZero(item.getLineTotal()))
-            .reduce(BigDecimal.ZERO, BigDecimal::add);
-        
-        BigDecimal totalDiscount = defaultZero(order.getDiscount());
+        BigDecimal gstRate = getGstRate(order.getPaymentMode());
+        BigDecimal rawTotal = calcRawTotal(order);
+        BigDecimal discount = defaultZero(order.getDiscount());
         
         List<PraInvoiceItem> items = order.getItems().stream()
-            .map(item -> toItem(item, invoiceType, gstRate, totalDiscount, rawTotalSaleValue))
+            .map(item -> mapItem(item, gstRate, discount, rawTotal))
             .toList();
 
-        // Calculate totals from items
-        BigDecimal totalSaleValue = items.stream()
-            .map(PraInvoiceItem::saleValue)
-            .reduce(BigDecimal.ZERO, BigDecimal::add);
-        
-        BigDecimal totalTaxCharged = items.stream()
-            .map(PraInvoiceItem::taxCharged)
-            .reduce(BigDecimal.ZERO, BigDecimal::add);
-        
-        BigDecimal totalQuantity = items.stream()
-            .map(PraInvoiceItem::quantity)
-            .reduce(BigDecimal.ZERO, BigDecimal::add);
-        
-        BigDecimal totalFurtherTax = BigDecimal.ZERO;
+        BigDecimal totalSale = sum(items, PraInvoiceItem::saleValue);
+        BigDecimal totalTax = sum(items, PraInvoiceItem::taxCharged);
+        BigDecimal totalQty = sum(items, PraInvoiceItem::quantity);
+        BigDecimal totalBill = totalSale.add(totalTax).max(BigDecimal.ZERO);
 
-        // TotalBillAmount = TotalSaleValue + TotalTaxCharged
-        // (Discount already applied at item level, so no need to subtract here)
-        BigDecimal totalBillAmount = totalSaleValue
-            .add(totalTaxCharged)
-            .setScale(2, RoundingMode.HALF_UP);
-        
-        if (totalBillAmount.signum() < 0) {
-            totalBillAmount = BigDecimal.ZERO;
-        }
+        logger.info("Invoice totals - Sale: {}, Tax: {}, Bill: {}", totalSale, totalTax, totalBill);
 
-        logger.info("=== Invoice Totals Calculation ===");
-        logger.info("Total Sale Value: {}", totalSaleValue);
-        logger.info("Total Tax Charged: {}", totalTaxCharged);
-        logger.info("Total Discount: {}", totalDiscount);
-        logger.info("Total Bill Amount: {} (Formula: {} + {}, discount already in saleValue)", 
-            totalBillAmount, totalSaleValue, totalTaxCharged);
-        logger.info("Total Quantity: {}", totalQuantity);
-
-        PraInvoiceModel model = new PraInvoiceModel(
-            getPosId(),
+        return new PraInvoiceModel(
+            props.getPosId(),
             order.getInvoiceNumber(),
-            IMS_DATE_TIME.format(order.getCreatedAt()),
-            totalSaleValue,
-            totalTaxCharged,
-            totalBillAmount,
-            totalQuantity,
+            DATE_FORMAT.format(order.getCreatedAt()),
+            totalSale,
+            totalTax,
+            totalBill,
+            totalQty,
             mapPaymentMode(order.getPaymentMode()),
-            invoiceType,
+            props.getInvoiceType(),
             items,
             "",
             null,
             order.getCustomerName(),
-            fallback(order.getCustomerPntn(), order.getCustomerTaxId()),
+            firstNonBlank(order.getCustomerPntn(), order.getCustomerTaxId()),
             order.getCustomerCnic(),
             order.getCustomerPhone(),
-            totalDiscount,
-            totalFurtherTax
+            discount,
+            BigDecimal.ZERO
         );
-        
-        logger.info("=== PRA Invoice Mapping Completed ===");
-        return model;
     }
 
-    private PraInvoiceItem toItem(OrderItem orderItem, int invoiceType, BigDecimal gstRate,
-                                   BigDecimal totalDiscount, BigDecimal rawTotalSaleValue) {
+    private PraInvoiceItem mapItem(OrderItem orderItem, BigDecimal gstRate, 
+                                    BigDecimal totalDiscount, BigDecimal rawTotal) {
         var item = orderItem.getItem();
+        
         if (item.getItemCode() == null || item.getItemCode().isBlank()) {
-            throw new IllegalArgumentException("Item code is required for fiscalization");
+            throw new IllegalArgumentException("Item code required for fiscalization");
         }
         
-        BigDecimal quantity = BigDecimal.valueOf(orderItem.getQuantity());
+        BigDecimal qty = BigDecimal.valueOf(orderItem.getQuantity());
         BigDecimal lineTotal = defaultZero(orderItem.getLineTotal());
         
-        // Calculate proportional discount for this item
+        // Proportional discount
         BigDecimal itemDiscount = BigDecimal.ZERO;
-        if (rawTotalSaleValue.signum() > 0 && totalDiscount.signum() > 0) {
-            itemDiscount = lineTotal
-                .divide(rawTotalSaleValue, 10, RoundingMode.HALF_UP)
+        if (rawTotal.signum() > 0 && totalDiscount.signum() > 0) {
+            itemDiscount = lineTotal.divide(rawTotal, 10, RoundingMode.HALF_UP)
                 .multiply(totalDiscount)
                 .setScale(2, RoundingMode.HALF_UP);
         }
         
-        // PRA Format:
-        // SaleValue = Price × Quantity - Proportional Discount (EXCLUDING tax)
-        // TaxCharged = SaleValue × TaxRate
-        // TotalAmount = SaleValue + TaxCharged
-        
-        // SaleValue AFTER discount
         BigDecimal saleValue = lineTotal.subtract(itemDiscount).setScale(2, RoundingMode.HALF_UP);
-        
-        // PRA expects TaxRate as percentage (e.g., 16 for 16%, not 0.16)
-        BigDecimal taxRate = gstRate.multiply(ONE_HUNDRED).setScale(2, RoundingMode.HALF_UP);
-        
-        // Calculate tax on the discounted sale value
+        BigDecimal taxRate = gstRate.multiply(HUNDRED).setScale(2, RoundingMode.HALF_UP);
         BigDecimal taxCharged = saleValue.multiply(gstRate).setScale(2, RoundingMode.HALF_UP);
-        
-        // Total = SaleValue + Tax
         BigDecimal totalAmount = saleValue.add(taxCharged).setScale(2, RoundingMode.HALF_UP);
         
-        BigDecimal furtherTax = BigDecimal.ZERO;
-
         String pctCode = item.getPctCode();
         if (pctCode == null || pctCode.isBlank()) {
-            pctCode = getDefaultPctCode();
+            pctCode = props.getDefaultPctCode();
         }
 
-        logger.info("  Item: {} ({})", item.getName(), item.getItemCode());
-        logger.info("    Quantity: {}, Unit Price: {}, Line Total: {}", 
-            quantity, orderItem.getUnitPrice(), lineTotal);
-        logger.info("    Item Discount: {}, Sale Value (after discount): {}", itemDiscount, saleValue);
-        logger.info("    Tax Rate: {}%, Tax Charged: {}, Total Amount: {}", 
-            taxRate, taxCharged, totalAmount);
-        logger.info("    PCT Code: {}", pctCode);
+        logger.debug("Item {} - Sale: {}, Tax: {}, PCT: {}", item.getName(), saleValue, taxCharged, pctCode);
 
         return new PraInvoiceItem(
             item.getItemCode(),
             item.getName(),
             pctCode,
-            quantity,
+            qty,
             taxRate,
             saleValue,
             taxCharged,
             totalAmount,
-            invoiceType,
+            props.getInvoiceType(),
             itemDiscount,
-            furtherTax,
+            BigDecimal.ZERO,
             null
         );
     }
 
-    private BigDecimal defaultZero(BigDecimal value) {
-        return value == null ? BigDecimal.ZERO : value;
+    private BigDecimal getGstRate(PaymentMode mode) {
+        return BigDecimal.valueOf(mode == PaymentMode.CARD ? props.getCardGstRate() : props.getCashGstRate());
     }
 
-    private String fallback(String primary, String secondary) {
-        if (primary != null && !primary.isBlank()) {
-            return primary;
+    private int mapPaymentMode(PaymentMode mode) {
+        return mode == PaymentMode.CARD ? 2 : 1;
+    }
+
+    private BigDecimal calcRawTotal(Order order) {
+        return order.getItems().stream()
+            .map(i -> defaultZero(i.getLineTotal()))
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    private BigDecimal sum(List<PraInvoiceItem> items, java.util.function.Function<PraInvoiceItem, BigDecimal> getter) {
+        return items.stream().map(getter).reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    private BigDecimal defaultZero(BigDecimal val) {
+        return val == null ? BigDecimal.ZERO : val;
+    }
+
+    private String firstNonBlank(String... values) {
+        for (String v : values) {
+            if (v != null && !v.isBlank()) return v;
         }
-        return secondary;
-    }
-
-    private int mapPaymentMode(com.example.pos.entity.PaymentMode paymentMode) {
-        if (paymentMode == com.example.pos.entity.PaymentMode.CARD) {
-            return 2;
-        }
-        return 1;
-    }
-
-    private BigDecimal resolveGstRate(com.example.pos.entity.PaymentMode paymentMode) {
-        if (paymentMode == com.example.pos.entity.PaymentMode.CARD) {
-            return BigDecimal.valueOf(getCardGstRate());
-        }
-        return BigDecimal.valueOf(getCashGstRate());
-    }
-
-    private boolean isCloudMode() {
-        return "cloud".equalsIgnoreCase(properties.getMode());
-    }
-
-    private int getInvoiceType() {
-        return isCloudMode() ? properties.getCloud().getInvoiceType() : properties.getIms().getInvoiceType();
-    }
-
-    private String getDefaultPctCode() {
-        return isCloudMode() ? properties.getCloud().getDefaultPctCode() : properties.getIms().getDefaultPctCode();
-    }
-
-    private double getCashGstRate() {
-        return isCloudMode() ? properties.getCloud().getCashGstRate() : properties.getIms().getCashGstRate();
-    }
-
-    private double getCardGstRate() {
-        return isCloudMode() ? properties.getCloud().getCardGstRate() : properties.getIms().getCardGstRate();
-    }
-
-    private long getPosId() {
-        return isCloudMode() ? properties.getCloud().getPosId() : properties.getIms().getPosId();
+        return null;
     }
 }

@@ -11,28 +11,18 @@ public class PraConfiguration {
 
     @Bean
     public PraFiscalizationClient praFiscalizationClient(
-        PraProperties properties,
+        PraProperties props,
         StubPraFiscalizationClient stubClient,
-        ImsPraFiscalizationClient imsClient,
         CloudPraFiscalizationClient cloudClient
     ) {
-        String mode = properties.getMode();
-        logger.info("Initializing PRA Fiscalization Client with mode: {}", mode);
-
-        if ("cloud".equalsIgnoreCase(mode)) {
-            logger.info("Using Cloud PRA Fiscalization Client (environment: {})", 
-                properties.getCloud().getEnvironment());
-            return cloudClient;
-        } else if ("ims".equalsIgnoreCase(mode)) {
-            logger.info("Using IMS PRA Fiscalization Client (base URL: {})", 
-                properties.getImsBaseUrl());
-            return imsClient;
-        } else if (properties.getStub().isEnabled()) {
-            logger.info("Using Stub PRA Fiscalization Client");
+        String mode = props.getMode();
+        
+        if ("stub".equalsIgnoreCase(mode)) {
+            logger.info("PRA Mode: STUB (testing)");
             return stubClient;
-        } else {
-            logger.info("Defaulting to IMS PRA Fiscalization Client");
-            return imsClient;
         }
+        
+        logger.info("PRA Mode: CLOUD (environment: {})", props.getEnvironment());
+        return cloudClient;
     }
 }
