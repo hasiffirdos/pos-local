@@ -533,13 +533,17 @@ export default function PosPage() {
             </div>
           )}
 
-          {/* Software Contact Info */}
-          <div className="receipt-divider"></div>
-          <div className="receipt-software-contact">
-            <p>For POS Software inquiries:</p>
-            <p>📞 0316-4985788</p>
-            <p>✉️ h.asif.firdos@gmail.com</p>
-          </div>
+          {/* Software Contact Info - shows after Feb 14, 2026 */}
+          {new Date() >= new Date('2026-02-14') && (
+            <>
+              <div className="receipt-divider"></div>
+              <div className="receipt-software-contact">
+                <p>For POS Software inquiries:</p>
+                <p>📞 0316-4985788</p>
+                <p>✉️ h.asif.firdos@gmail.com</p>
+              </div>
+            </>
+          )}
         </div>
         <div className="collapsible">
           <button
