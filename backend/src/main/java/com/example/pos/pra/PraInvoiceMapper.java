@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.time.ZoneOffset;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -18,7 +18,7 @@ import java.util.List;
 public class PraInvoiceMapper {
     private static final Logger logger = LoggerFactory.getLogger(PraInvoiceMapper.class);
     private static final DateTimeFormatter IMS_DATE_TIME =
-        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneOffset.UTC);
+        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.of("Asia/Karachi"));
     private static final BigDecimal ONE_HUNDRED = new BigDecimal("100");
 
     private final PraProperties properties;
