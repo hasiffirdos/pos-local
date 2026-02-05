@@ -26,15 +26,15 @@ if not exist ".git" (
     exit /b 1
 )
 
-git fetch origin main
+git fetch origin main >nul 2>&1
 
-git stash push -m "local-config" -- backend/src/main/resources/application.yml backend/build/resources/main/application.yml 2>nul
+git stash push -m "local-config" -- backend/src/main/resources/application.yml backend/build/resources/main/application.yml >nul 2>&1
 
-git reset --hard origin/main
+git reset --hard origin/main >nul 2>&1
 
-git clean -fd 2>nul
+git clean -fd >nul 2>&1
 
-git stash pop 2>nul
+git stash pop >nul 2>&1
 
 
 
