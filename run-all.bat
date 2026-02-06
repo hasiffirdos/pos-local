@@ -20,14 +20,9 @@ if not exist ".git" (
     exit /b 1
 )
 
-REM Stash any local changes
-git stash >nul 2>&1
-
-REM Pull latest from remote
-git pull origin main >nul 2>&1
-
-REM Restore stashed changes
-git stash pop >nul 2>&1
+REM Fetch and reset to remote (discards all local changes)
+git fetch origin main >nul 2>&1
+git reset --hard origin/main >nul 2>&1
 
 start "POS Backend" cmd /k "%~dp0run-backend.bat"
 start "POS Frontend" cmd /k "%~dp0run-frontend.bat"
