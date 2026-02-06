@@ -55,6 +55,8 @@ public class CloudPraFiscalizationClient implements PraFiscalizationClient {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + token);
         headers.set("Content-Type", "application/json");
+        headers.set("User-Agent", "curl/7.88.1");
+        headers.set("Accept", "*/*");
 
         try {
             ResponseEntity<ImsInvoiceResponse> response = restTemplate.exchange(
